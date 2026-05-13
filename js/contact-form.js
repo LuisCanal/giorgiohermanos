@@ -14,23 +14,27 @@
     }
 
     var fd = new FormData(form);
-    var payload = {
-      name: fd.get("name"),
-      email: fd.get("email"),
-      subject: fd.get("subject"),
-      message: fd.get("message"),
-    };
+    var body = new URLSearchParams();
+    body.set("name", String(fd.get("name") || ""));
+    body.set("email", String(fd.get("email") || ""));
+    body.set("subject", String(fd.get("subject") || ""));
+    body.set("message", String(fd.get("message") || ""));
 
     fetch("/api/contact", {
       method: "POST",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: body,
     })
       .then(function (r) {
-        return r.json().then(function (data) {
+        return r.text().then(function (text) {
+          var data = {};
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch (e) {
+            data = { error: text || "Respuesta inválida del servidor" };
+          }
           return { r: r, data: data };
         });
       })
@@ -48,8 +52,15 @@
         } else {
           form.classList.add("failed");
           if (out) {
-            out.textContent =
+            var msg =
               (data && data.error) || "Error al enviar. Probá de nuevo más tarde.";
+            if (data && data.detail) {
+              msg += " (" + String(data.detail).slice(0, 200) + ")";
+            }
+            if (data && data.hint) {
+              msg += " " + data.hint;
+            }
+            out.textContent = msg;
             out.removeAttribute("aria-hidden");
           }
         }

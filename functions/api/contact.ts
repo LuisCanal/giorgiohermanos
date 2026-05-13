@@ -7,21 +7,64 @@ type Env = {
 
 type PagesCtx = { request: Request; env: Env };
 
+function corsHeaders(request: Request): Record<string, string> {
+  const origin = request.headers.get("Origin");
+  const allow =
+    origin && origin !== "null"
+      ? origin
+      : "*";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    Vary: "Origin",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Max-Age": "86400",
+  };
+}
+
+function json(
+  body: unknown,
+  request: Request,
+  init: { status?: number; headers?: Record<string, string> } = {},
+): Response {
+  const h = new Headers({
+    "Content-Type": "application/json; charset=utf-8",
+    ...corsHeaders(request),
+    ...init.headers,
+  });
+  return new Response(JSON.stringify(body), {
+    status: init.status ?? 200,
+    headers: h,
+  });
+}
+
 export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders(request),
+    });
+  }
+
   if (request.method !== "POST") {
-    return new Response(JSON.stringify({ ok: false, error: "Método no permitido" }), {
+    return json({ ok: false, error: "Método no permitido" }, request, {
       status: 405,
-      headers: { "Content-Type": "application/json; charset=utf-8", Allow: "POST" },
+      headers: { Allow: "POST, OPTIONS" },
     });
   }
 
   const apiKey = env.RESEND_API_KEY;
   const to = env.CONTACT_TO || env.MAIL_TO;
   if (!apiKey || !to) {
-    return new Response(JSON.stringify({ ok: false, error: "Falta configuración del servidor" }), {
-      status: 503,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
+    return json(
+      {
+        ok: false,
+        error: "Falta configuración del servidor",
+        hint: "Definí RESEND_API_KEY y CONTACT_TO (o MAIL_TO) en Pages → Settings → Variables (y redeploy).",
+      },
+      request,
+      { status: 503 },
+    );
   }
 
   let name = "";
@@ -38,10 +81,7 @@ export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> =
       subject = String(j.subject ?? j["your-subject"] ?? "");
       message = String(j.message ?? j["your-message"] ?? "");
     } catch {
-      return new Response(JSON.stringify({ ok: false, error: "JSON inválido" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-      });
+      return json({ ok: false, error: "JSON inválido" }, request, { status: 400 });
     }
   } else {
     const form = await request.formData();
@@ -52,10 +92,11 @@ export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> =
   }
 
   if (!name.trim() || !email.trim() || !message.trim()) {
-    return new Response(JSON.stringify({ ok: false, error: "Nombre, email y mensaje son obligatorios" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
+    return json(
+      { ok: false, error: "Nombre, email y mensaje son obligatorios" },
+      request,
+      { status: 400 },
+    );
   }
 
   const subj = subject.trim() || "Consulta desde la web";
@@ -85,23 +126,19 @@ export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> =
 
   if (!res.ok) {
     const detail = await res.text();
-    return new Response(
-      JSON.stringify({
+    console.error("[contact] Resend HTTP", res.status, detail.slice(0, 500));
+    return json(
+      {
         ok: false,
         error: "No se pudo enviar el mensaje",
         detail: detail.slice(0, 400),
-      }),
-      {
-        status: 502,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
       },
+      request,
+      { status: 502 },
     );
   }
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-  });
+  return json({ ok: true }, request, { status: 200 });
 };
 
 function escapeHtml(s: string): string {

@@ -1,4 +1,5 @@
-# Copiar a .dev.vars para `wrangler pages dev` (no subir .dev.vars al repo)
+# Local: copiar a .dev.vars (no subir .dev.vars al repo)
+# Producción: Cloudflare Pages → Settings → Variables (sin wrangler.jsonc en el repo).
 RESEND_API_KEY=re_xxxxxxxx
 CONTACT_TO=info@giorgiohermanos.com
 MAIL_FROM=Giorgio Hermanos <notificaciones@tudominioverificado.com>
