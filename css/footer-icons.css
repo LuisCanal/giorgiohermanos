@@ -1,0 +1,30 @@
+/* Iconos del footer: el export estático no incluye los <span class="fa"> del customizer. */
+#footer .company-details {
+  text-align: center;
+}
+#footer .company-details .zerif-footer-address::before,
+#footer .company-details .zerif-footer-email::before,
+#footer .company-details .zerif-footer-phone::before {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: block;
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+#footer .company-details .zerif-footer-address::before {
+  content: "\f041";
+  color: #e96656;
+}
+#footer .company-details .zerif-footer-email::before {
+  content: "\f0e0";
+  color: #34d293;
+}
+#footer .company-details .zerif-footer-phone::before {
+  content: "\f095";
+  color: #3ab0e2;
+}
