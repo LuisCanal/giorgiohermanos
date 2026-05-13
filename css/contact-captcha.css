@@ -16,14 +16,53 @@
   margin: 0;
   font-weight: normal;
 }
+
+/* Bloque verificación: mismo ancho y ritmo que el resto del formulario */
 .gh-captcha-block {
-  margin: 1em 0;
-  padding: 12px 14px;
-  background: #f7f7f7;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  margin: 1.25em 0;
+  padding: 18px 20px 20px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+.gh-captcha-block .gh-captcha-label {
+  margin: 0 0 12px 0;
+  padding: 0;
 }
 .gh-captcha-block .gh-captcha-q {
+  display: block;
   font-weight: 600;
-  color: #404040;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #333;
+}
+.gh-captcha-block .gh-captcha-field-wrap {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.gh-captcha-block .gh-captcha-field-wrap .wpcf7-form-control-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+.gh-captcha-block .gh-captcha-input {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 10px 14px;
+  min-height: 44px;
+}
+/* Quitar flechas de number en navegadores que las muestren por error */
+.gh-captcha-input::-webkit-outer-spin-button,
+.gh-captcha-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
