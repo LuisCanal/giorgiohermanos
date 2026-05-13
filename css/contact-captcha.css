@@ -1,0 +1,29 @@
+/* Anti-spam: campo trampa invisible para humanos */
+.gh-hny-wrap {
+  position: absolute !important;
+  left: -10000px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.gh-hny-wrap label {
+  margin: 0;
+  font-weight: normal;
+}
+.gh-captcha-block {
+  margin: 1em 0;
+  padding: 12px 14px;
+  background: #f7f7f7;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+.gh-captcha-block .gh-captcha-q {
+  font-weight: 600;
+  color: #404040;
+}

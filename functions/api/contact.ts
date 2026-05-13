@@ -38,6 +38,63 @@ function json(
   });
 }
 
+const MIN_MS = 2500;
+const MAX_MS = 45 * 60 * 1000;
+
+function parseFormFields(request: Request, ct: string): Promise<Record<string, string>> {
+  if (ct.includes("application/json")) {
+    return request.json().then((j) => {
+      const o = j as Record<string, unknown>;
+      const s: Record<string, string> = {};
+      for (const k of Object.keys(o)) {
+        s[k] = String(o[k] ?? "");
+      }
+      return s;
+    });
+  }
+  return request.formData().then((form) => {
+    const s: Record<string, string> = {};
+    for (const [k, v] of form.entries()) {
+      s[k] = typeof v === "string" ? v : "";
+    }
+    return s;
+  });
+}
+
+function validateAntiSpam(fd: Record<string, string>): string | null {
+  if (String(fd.company_site ?? "").trim() !== "") {
+    return "No se pudo enviar el mensaje.";
+  }
+
+  const opened = Number(fd.form_opened_ts);
+  const now = Date.now();
+  if (!Number.isFinite(opened) || opened <= 0) {
+    return "Recargá la página e intentá de nuevo.";
+  }
+  const elapsed = now - opened;
+  if (elapsed < MIN_MS) {
+    return "Esperá unos segundos antes de enviar (protección anti-spam).";
+  }
+  if (elapsed > MAX_MS) {
+    return "La sesión expiró. Recargá la página e intentá de nuevo.";
+  }
+
+  const n1 = parseInt(String(fd.gh_n1), 10);
+  const n2 = parseInt(String(fd.gh_n2), 10);
+  const ans = parseInt(String(fd.captcha_answer), 10);
+  if (!Number.isFinite(n1) || !Number.isFinite(n2) || !Number.isFinite(ans)) {
+    return "Completá la verificación numérica.";
+  }
+  if (n1 < 1 || n1 > 20 || n2 < 1 || n2 > 20) {
+    return "Verificación no válida. Recargá la página.";
+  }
+  if (ans < 2 || ans > 40 || n1 + n2 !== ans) {
+    return "La suma no es correcta. Revisá el resultado e intentá de nuevo.";
+  }
+
+  return null;
+}
+
 export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -67,29 +124,25 @@ export const onRequest = async ({ request, env }: PagesCtx): Promise<Response> =
     );
   }
 
-  let name = "";
-  let email = "";
-  let subject = "";
-  let message = "";
   const ct = request.headers.get("content-type") || "";
-
-  if (ct.includes("application/json")) {
-    try {
-      const j = (await request.json()) as Record<string, unknown>;
-      name = String(j.name ?? j["your-name"] ?? "");
-      email = String(j.email ?? j["your-email"] ?? "");
-      subject = String(j.subject ?? j["your-subject"] ?? "");
-      message = String(j.message ?? j["your-message"] ?? "");
-    } catch {
-      return json({ ok: false, error: "JSON inválido" }, request, { status: 400 });
-    }
-  } else {
-    const form = await request.formData();
-    name = String(form.get("name") ?? form.get("your-name") ?? "");
-    email = String(form.get("email") ?? form.get("your-email") ?? "");
-    subject = String(form.get("subject") ?? form.get("your-subject") ?? "");
-    message = String(form.get("message") ?? form.get("your-message") ?? "");
+  let fd: Record<string, string>;
+  try {
+    fd = await parseFormFields(request, ct);
+  } catch {
+    return json({ ok: false, error: "Datos del formulario inválidos" }, request, {
+      status: 400,
+    });
   }
+
+  const spamErr = validateAntiSpam(fd);
+  if (spamErr) {
+    return json({ ok: false, error: spamErr }, request, { status: 400 });
+  }
+
+  const name = String(fd.name ?? fd["your-name"] ?? "");
+  const email = String(fd.email ?? fd["your-email"] ?? "");
+  const subject = String(fd.subject ?? fd["your-subject"] ?? "");
+  const message = String(fd.message ?? fd["your-message"] ?? "");
 
   if (!name.trim() || !email.trim() || !message.trim()) {
     return json(

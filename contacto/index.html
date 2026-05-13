@@ -59,6 +59,7 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 <link rel="stylesheet" id="zerif_bootstrap_style-css" href="/wp-content/themes/zerif-lite/css/bootstrap.css?ver=6.9.4" type="text/css" media="all">
 <link rel="stylesheet" id="zerif_fontawesome-css" href="/wp-content/themes/zerif-lite/css/font-awesome.min.css?ver=v1" type="text/css" media="all">
 <link rel="stylesheet" id="giorgio-footer-icons-css" href="/css/footer-icons.css" type="text/css" media="all">
+<link rel="stylesheet" id="giorgio-contact-captcha-css" href="/css/contact-captcha.css" type="text/css" media="all">
 <link rel="stylesheet" id="zerif_style-css" href="/wp-content/themes/zerif-lite/style.css?ver=1.8.5.49" type="text/css" media="all">
 <link rel="stylesheet" id="zerif_responsive_style-css" href="/wp-content/themes/zerif-lite/css/responsive.css?ver=1.8.5.49" type="text/css" media="all">
 <script type="text/javascript" src="/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
@@ -179,6 +180,14 @@ body.custom-background { background-image: url("/wp-content/uploads/2015/09/PORT
 <p><span class="wpcf7-form-control-wrap"><input size="40" maxlength="400" class="wpcf7-form-control wpcf7-text" type="text" name="subject" autocomplete="off"></span></p>
 <p>Mensaje</p>
 <p><span class="wpcf7-form-control-wrap"><textarea cols="40" rows="10" maxlength="2000" class="wpcf7-form-control wpcf7-textarea" name="message" required></textarea></span></p>
+<p class="gh-hny-wrap" aria-hidden="true"><label>Sitio web <input type="text" name="company_site" value="" autocomplete="off" tabindex="-1"></label></p>
+<div class="gh-captcha-block">
+<p class="gh-captcha-label"><span id="gh-captcha-q" class="gh-captcha-q">Verificación</span></p>
+<p><span class="wpcf7-form-control-wrap"><input id="gh-captcha-ans" class="wpcf7-form-control wpcf7-text" type="number" name="captcha_answer" inputmode="numeric" min="0" max="99" required placeholder="Resultado" aria-label="Resultado de la suma"></span></p>
+<input type="hidden" name="gh_n1" id="gh-n1" value="">
+<input type="hidden" name="gh_n2" id="gh-n2" value="">
+<input type="hidden" name="form_opened_ts" id="gh-form-opened-ts" value="">
+</div>
 <p><input class="wpcf7-form-control wpcf7-submit" type="submit" value="Enviar"></p>
 <div class="wpcf7-response-output" aria-hidden="true"></div>
 </form>
