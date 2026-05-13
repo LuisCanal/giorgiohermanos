@@ -1,0 +1,12 @@
+{
+  "name": "giorgiohermanos-static",
+  "private": true,
+  "scripts": {
+    "patch-html": "node scripts/patch-html.mjs",
+    "pages:dev": "wrangler pages dev . --compatibility-date=2026-05-01",
+    "pages:deploy": "wrangler pages deploy . --project-name=giorgiohermanos"
+  },
+  "devDependencies": {
+    "wrangler": "^4.22.0"
+  }
+}

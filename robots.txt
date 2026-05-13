@@ -1,0 +1,9 @@
+# https://giorgiohermanos.com
+User-agent: *
+Allow: /
+
+# Rutas técnicas o de bajo valor para búsqueda
+Disallow: /login-customizer/
+Disallow: /category/
+
+Sitemap: https://giorgiohermanos.com/sitemap.xml
